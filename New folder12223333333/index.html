@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Budget Tracker 2.0</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            text-align: center;
+        }
+        .container {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        input, button, select {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: calc(100% - 22px);
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .income { color: green; }
+        .expense { color: red; }
+        .negative-balance { color: red; font-weight: bold; }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background: #f8f9fa;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .chart-container {
+            max-width: 100%;
+            margin: 20px auto;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Budget Tracker 2.0</h2>
+        <h3>Total Balance: ₦<span id="total">0</span></h3>
+        <div class="summary">Income: ₦<span id="income">0</span> | Expenses: ₦<span id="expenses">0</span></div>
+        <input type="text" id="desc" placeholder="Description">
+        <input type="number" id="amount" placeholder="Amount">
+        <button onclick="addTransaction()">Add</button>
+        <ul id="transactions"></ul>
+        <button onclick="clearTransactions()">Clear All</button>
+        <div class="chart-container">
+            <canvas id="budgetChart"></canvas>
+        </div>
+    </div>
+    <script>
+        let balance = 0;
+        let income = 0;
+        let expenses = 0;
+        let chart;
+        function addTransaction() {
+            let desc = document.getElementById("desc").value;
+            let amount = parseFloat(document.getElementById("amount").value);
+            if (!desc || isNaN(amount)) {
+                alert("Please enter a valid description and amount.");
+                return;
+            }
+            let transactionList = document.getElementById("transactions");
+            let listItem = document.createElement("li");
+            listItem.textContent = `${desc}: ₦${amount}`;
+            if (amount < 0) {
+                listItem.classList.add("expense");
+                expenses += Math.abs(amount);
+            } else {
+                listItem.classList.add("income");
+                income += amount;
+            }
+            balance += amount;
+            transactionList.appendChild(listItem);
+            document.getElementById("total").textContent = balance;
+            document.getElementById("income").textContent = income;
+            document.getElementById("expenses").textContent = expenses;
+            document.getElementById("desc").value = "";
+            document.getElementById("amount").value = "";
+            updateChart();
+        }
+        function clearTransactions() {
+            document.getElementById("transactions").innerHTML = "";
+            balance = 0;
+            income = 0;
+            expenses = 0;
+            document.getElementById("total").textContent = balance;
+            document.getElementById("income").textContent = income;
+            document.getElementById("expenses").textContent = expenses;
+            updateChart();
+        }
+        function updateChart() {
+            if (chart) {
+                chart.destroy();
+            }
+            let ctx = document.getElementById("budgetChart").getContext("2d");
+            chart = new Chart(ctx, {
+                type: "pie",
+                data: {
+                    labels: ["Income", "Expenses"],
+                    datasets: [{
+                        data: [income, expenses],
+                        backgroundColor: ["green", "red"]
+                    }]
+                }
+            });
+        }
+        updateChart();
+    </script>
+</body>
+</html>
